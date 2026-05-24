@@ -6,6 +6,8 @@ export interface MaterialItem {
   name: string;
   quantity: number;
   unit: string;
+  positions?: Point[];
+  color?: string;
 }
 
 export interface CableLength {
@@ -63,6 +65,10 @@ interface AppState {
   setIsMeasuring: (val: boolean) => void;
   addManualMeasurement: (measurement: ManualMeasurement) => void;
   removeManualMeasurement: (id: string) => void;
+
+  // Symbol Selection
+  selectedMaterialId: string | null;
+  setSelectedMaterialId: (id: string | null) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -105,5 +111,12 @@ export const useAppStore = create<AppState>((set) => ({
   removeManualMeasurement: (id) =>
     set((state) => ({
       manualMeasurements: state.manualMeasurements.filter((m) => m.id !== id),
+    })),
+
+  // Symbol Selection
+  selectedMaterialId: null,
+  setSelectedMaterialId: (id) =>
+    set((state) => ({
+      selectedMaterialId: state.selectedMaterialId === id ? null : id,
     })),
 }));

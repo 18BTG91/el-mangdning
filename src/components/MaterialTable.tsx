@@ -5,7 +5,7 @@ import { Package, Cable, Trash2, Ruler } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 
 export default function MaterialTable() {
-  const { analysisResult, isAnalyzing, manualMeasurements, removeManualMeasurement } = useAppStore();
+  const { analysisResult, isAnalyzing, manualMeasurements, removeManualMeasurement, selectedMaterialId, setSelectedMaterialId } = useAppStore();
 
   if (isAnalyzing) {
     return (
@@ -72,21 +72,49 @@ export default function MaterialTable() {
                 </tr>
               </thead>
               <tbody>
-                {materials.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="border-b border-slate-700/50 hover:bg-slate-700/30"
-                  >
-                    <td className="px-4 py-2 text-base">{item.symbol}</td>
-                    <td className="px-4 py-2 text-slate-200">{item.name}</td>
-                    <td className="px-4 py-2 text-right font-mono text-slate-200">
-                      {item.quantity}
-                    </td>
-                    <td className="px-4 py-2 text-right text-slate-400">
-                      {item.unit}
-                    </td>
-                  </tr>
-                ))}
+                {materials.map((item) => {
+                  const isSelected = selectedMaterialId === item.id;
+                  return (
+                    <tr
+                      key={item.id}
+                      onClick={() => setSelectedMaterialId(item.id)}
+                      className={`border-b border-slate-700/50 cursor-pointer transition-colors ${
+                        isSelected
+                          ? "bg-blue-600/20 hover:bg-blue-600/25"
+                          : "hover:bg-slate-700/30"
+                      }`}
+                    >
+                      <td className="px-4 py-2 text-base">
+                        <span className="relative">
+                          {item.symbol}
+                          {isSelected && (
+                            <span
+                              className="absolute -left-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full animate-pulse"
+                              style={{ backgroundColor: item.color || "#3b82f6" }}
+                            />
+                          )}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 text-slate-200">
+                        <span className="flex items-center gap-2">
+                          {item.name}
+                          {isSelected && (
+                            <span
+                              className="w-2 h-2 rounded-full shrink-0"
+                              style={{ backgroundColor: item.color || "#3b82f6" }}
+                            />
+                          )}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 text-right font-mono text-slate-200">
+                        {item.quantity}
+                      </td>
+                      <td className="px-4 py-2 text-right text-slate-400">
+                        {item.unit}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

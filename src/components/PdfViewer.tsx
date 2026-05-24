@@ -5,6 +5,7 @@ import { useDropzone } from "react-dropzone";
 import { Upload, ZoomIn, ZoomOut, RotateCcw, Maximize2, Ruler } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import MeasureOverlay from "./MeasureOverlay";
+import SymbolOverlay from "./SymbolOverlay";
 
 export default function PdfViewer() {
   const { pdfFile, pdfUrl, setPdfFile, isMeasuring, setIsMeasuring } = useAppStore();
@@ -225,11 +226,18 @@ export default function PdfViewer() {
           <div className="relative">
             <canvas ref={canvasRef} className="max-w-none" />
             {canvasSize.width > 0 && (
-              <MeasureOverlay
-                canvasWidth={canvasSize.width}
-                canvasHeight={canvasSize.height}
-                zoom={zoom * 1.5}
-              />
+              <>
+                <SymbolOverlay
+                  canvasWidth={canvasSize.width}
+                  canvasHeight={canvasSize.height}
+                  zoom={zoom * 1.5}
+                />
+                <MeasureOverlay
+                  canvasWidth={canvasSize.width}
+                  canvasHeight={canvasSize.height}
+                  zoom={zoom * 1.5}
+                />
+              </>
             )}
           </div>
         </div>
