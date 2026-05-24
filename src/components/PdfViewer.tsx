@@ -2,13 +2,15 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, ZoomIn, ZoomOut, RotateCcw, Maximize2 } from "lucide-react";
+import { Upload, ZoomIn, ZoomOut, RotateCcw, Maximize2, Ruler } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
+import MeasureOverlay from "./MeasureOverlay";
 
 export default function PdfViewer() {
-  const { pdfFile, pdfUrl, setPdfFile } = useAppStore();
+  const { pdfFile, pdfUrl, setPdfFile, isMeasuring, setIsMeasuring } = useAppStore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
   const [zoom, setZoom] = useState(1);
   const [pageNum, setPageNum] = useState(1);
   const [numPages, setNumPages] = useState(0);
@@ -69,16 +71,19 @@ export default function PdfViewer() {
 
     canvas.height = viewport.height;
     canvas.width = viewport.width;
+    setCanvasSize({ width: viewport.width, height: viewport.height });
 
     await pageObj.render({ canvasContext: context, viewport }).promise;
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (isMeasuring) return;
     setIsDragging(true);
     setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    if (isMeasuring) return;
     if (!isDragging) return;
     setOffset({
       x: e.clientX - dragStart.x,
@@ -152,6 +157,19 @@ export default function PdfViewer() {
           >
             <Maximize2 className="w-4 h-4" />
           </button>
+          <div className="w-px h-5 bg-slate-600 mx-1" />
+          <button
+            onClick={() => setIsMeasuring(!isMeasuring)}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium transition-colors ${
+              isMeasuring
+                ? "bg-blue-600 text-white"
+                : "hover:bg-slate-700 text-slate-300"
+            }`}
+            title="Aktivera manuell mätning"
+          >
+            <Ruler className="w-3.5 h-3.5" />
+            {isMeasuring ? "Mätning aktiv" : "Mät"}
+          </button>
         </div>
         <div className="flex items-center gap-2 text-xs text-slate-400">
           {numPages > 1 && (
@@ -187,7 +205,9 @@ export default function PdfViewer() {
       {/* Canvas area */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-hidden bg-slate-900 rounded-b-lg cursor-grab active:cursor-grabbing relative"
+        className={`flex-1 overflow-hidden bg-slate-900 rounded-b-lg relative ${
+          isMeasuring ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"
+        }`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -202,7 +222,16 @@ export default function PdfViewer() {
             minHeight: "100%",
           }}
         >
-          <canvas ref={canvasRef} className="max-w-none" />
+          <div className="relative">
+            <canvas ref={canvasRef} className="max-w-none" />
+            {canvasSize.width > 0 && (
+              <MeasureOverlay
+                canvasWidth={canvasSize.width}
+                canvasHeight={canvasSize.height}
+                zoom={zoom * 1.5}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>

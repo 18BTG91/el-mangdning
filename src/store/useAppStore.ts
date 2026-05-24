@@ -12,12 +12,25 @@ export interface CableLength {
   id: string;
   type: string;
   meters: number;
+  manual?: boolean;
 }
 
 export interface AnalysisResult {
   materials: MaterialItem[];
   cables: CableLength[];
   totalCableMeters: number;
+}
+
+export interface Point {
+  x: number;
+  y: number;
+}
+
+export interface ManualMeasurement {
+  id: string;
+  label: string;
+  points: Point[];
+  meters: number;
 }
 
 interface AppState {
@@ -43,6 +56,13 @@ interface AppState {
   avgTimePerUnit: number;
   setNumElectricians: (n: number) => void;
   setAvgTimePerUnit: (t: number) => void;
+
+  // Manual Measurement
+  isMeasuring: boolean;
+  manualMeasurements: ManualMeasurement[];
+  setIsMeasuring: (val: boolean) => void;
+  addManualMeasurement: (measurement: ManualMeasurement) => void;
+  removeManualMeasurement: (id: string) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -73,4 +93,17 @@ export const useAppStore = create<AppState>((set) => ({
   avgTimePerUnit: 0.5,
   setNumElectricians: (n) => set({ numElectricians: n }),
   setAvgTimePerUnit: (t) => set({ avgTimePerUnit: t }),
+
+  // Manual Measurement
+  isMeasuring: false,
+  manualMeasurements: [],
+  setIsMeasuring: (val) => set({ isMeasuring: val }),
+  addManualMeasurement: (measurement) =>
+    set((state) => ({
+      manualMeasurements: [...state.manualMeasurements, measurement],
+    })),
+  removeManualMeasurement: (id) =>
+    set((state) => ({
+      manualMeasurements: state.manualMeasurements.filter((m) => m.id !== id),
+    })),
 }));
